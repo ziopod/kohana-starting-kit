@@ -6,6 +6,10 @@ Starting Kohana website project in MVVM design patern.
 ## What inside ?
  
   - custom Boostrap with usefull stuffs `application/boostrap.php`
+    + cookie salt remember
+    + Auto set environment status
+    + Kohana::init configuration
+    + Additionnal config files based on environlent
   - Somes basiques modules
       + Kohana [cache](https://github.com/kohana/cache)
       + Ziopod [Flatfile for Kohana](https://github.com/ziopod/flatfile)
