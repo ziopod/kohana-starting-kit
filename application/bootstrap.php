@@ -70,6 +70,15 @@ mb_substitute_character('none');
  */
 I18n::lang('en-us');
 
+/**
+* Cookie salt
+*
+* Remember, set you cusom cookie salt
+**/
+// Text::random(null, 32); // Uncomment for generate ramdom Cookie salt
+Cookie::$salt = NULL;
+
+
 if (isset($_SERVER['SERVER_PROTOCOL']))
 {
 	// Replace the default protocol.
@@ -88,6 +97,29 @@ if (isset($_SERVER['KOHANA_ENV']))
 }
 
 /**
+* Auto set environment status based on domain name
+**/
+$server_name = $_SERVER['SERVER_NAME'];
+
+if (strpos($server_name, 'dev.') !== FALSE OR $_SERVER['SERVER_ADDR'] == '127.0.0.1')
+{
+	Kohana::$environment = Kohana::DEVELOPMENT;
+}
+else if (strpos($server_name, 'test.') !== FALSE)
+{
+	Kohana::$environment = Kohana::TESTING;
+}
+else if (strpos($server_name, 'stage.') !== FALSE)
+{
+	Kohana::$environment = Kohana::STAGING;
+}
+else
+{
+	Kohana::$environment = Kohana::PRODUCTION;
+}
+
+
+/**
  * Initialize Kohana, setting the default options.
  *
  * The following options are available:
@@ -103,8 +135,13 @@ if (isset($_SERVER['KOHANA_ENV']))
  * - boolean  expose      set the X-Powered-By header                        FALSE
  */
 Kohana::init(array(
-	'base_url'   => '/kohana/',
+	'base_url'		=> '/',
+	'index_file'	=> '',
+	'errors'		=> Kohana::$environment === Kohana::DEVELOPMENT,
+	'profile'		=> Kohana::$environment === Kohana::DEVELOPMENT,
+	'caching'		=> Kohana::$environment !== Kohana::DEVELOPMENT,
 ));
+
 
 /**
  * Attach the file write to logging. Multiple writers are supported.
@@ -115,6 +152,28 @@ Kohana::$log->attach(new Log_File(APPPATH.'logs'));
  * Attach a file reader to config. Multiple readers are supported.
  */
 Kohana::$config->attach(new Config_File);
+
+/**
+* Additionnal config based on environment
+**/
+switch (Kohana::$environment) {
+	case Kohana::DEVELOPMENT:
+		Kohana::$config->attach(new Config_File('config/development'), TRUE);
+		error_reporting(E_ALL);
+		break;
+	case Kohana::TESTING:
+		Kohana::$config->attach(new Config_File('config/testing'), TRUE);
+		error_reporting(E_ALL ^ E_NOTICE ^ E_STRICT);
+		break;
+	case Kohana::STAGING:
+		Kohana::$config->attach(new Config_File('config/staging'), TRUE);
+		error_reporting(E_ERROR);
+		break;
+	default:
+		Kohana::$config->attach(new Config_File);
+		error_reporting();
+		break;
+}
 
 /**
  * Enable modules. Modules are referenced by a relative or absolute path.
@@ -129,6 +188,8 @@ Kohana::modules(array(
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
 	// 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+	// 'kostache'	=> MODPATH.'kostache',   // Mustache for using Kohana in MVVM design pattern
+	// 'flatfile'	=> MODPATH.'flatfile',   // Data based on markdown flatfile files
 	));
 
 /**
