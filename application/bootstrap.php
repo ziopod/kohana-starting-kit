@@ -75,7 +75,7 @@ I18n::lang('en-us');
 *
 * Remember, set you cusom cookie salt
 **/
-// Text::random(null, 32); // Uncomment for generate ramdom Cookie salt
+// echo Debug::vars(Text::random(null, 32)); // Uncomment for generate ramdom Cookie salt
 Cookie::$salt = NULL;
 
 
